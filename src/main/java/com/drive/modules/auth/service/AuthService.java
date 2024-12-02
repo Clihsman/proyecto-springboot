@@ -2,8 +2,8 @@ package com.drive.modules.auth.service;
 
 import org.springframework.stereotype.Service;
 
-import com.drive.modules.auth.controller.SigninRequest;
-import com.drive.modules.auth.controller.TokenResponse;
+import com.drive.modules.auth.model.SigninRequest;
+import com.drive.modules.auth.model.TokenResponse;
 import com.drive.tools.Result;
 
 import lombok.RequiredArgsConstructor;
