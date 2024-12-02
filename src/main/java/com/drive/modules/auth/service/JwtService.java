@@ -1,6 +1,7 @@
 package com.drive.modules.auth.service;
 
 import java.security.MessageDigest;
+import java.util.Map;
 
 import javax.crypto.SecretKey;
 
@@ -14,7 +15,7 @@ import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtService {
-    public Result<String> generateToken(String id, String email) {
+    public Result<String> generateToken(String id, Map<String, ?> claims) {
 
         final Result<SecretKey> key = getSignInKey();
 
@@ -23,7 +24,7 @@ public class JwtService {
 
         return Result.success(Jwts.builder()
                 .id(id)
-                .claim("email", email)
+                .claims(claims)
                 .signWith(key.getValue())
                 .compact());
     }
