@@ -6,11 +6,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.drive.exception.NotAutorizedException;
 import com.drive.modules.api.ApiController;
-import com.drive.modules.auth.model.SigninRequest;
+import com.drive.modules.auth.model.AuthRequest;
+import com.drive.modules.auth.model.RegisterRequest;
 import com.drive.modules.auth.model.TokenResponse;
 import com.drive.modules.auth.service.AuthService;
-import com.drive.tools.Result;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +23,16 @@ public class AuthController extends ApiController {
 
     private final AuthService authService;
 
-    @PostMapping("/signin")
-    public ResponseEntity<Object> signin(@Valid @RequestBody final SigninRequest request) {
-        final Result<TokenResponse> token = authService.signin(request);
-        return processResponse(token);
+    @PostMapping("/register")
+    public ResponseEntity<TokenResponse> register(@Valid @RequestBody RegisterRequest request) {
+        final TokenResponse response = authService.register(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/authenticate")
+    public ResponseEntity<Object> authenticate(@Valid @RequestBody final AuthRequest request)
+            throws NotAutorizedException {
+        final TokenResponse token = authService.authenticate(request);
+        return ResponseEntity.ok(token);
     }
 }

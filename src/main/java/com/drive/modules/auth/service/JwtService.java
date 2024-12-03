@@ -1,13 +1,14 @@
 package com.drive.modules.auth.service;
 
-import java.security.MessageDigest;
+import java.util.Date;
 import java.util.Map;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.drive.tools.Result;
+import com.drive.modules.user.model.User;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -15,28 +16,71 @@ import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtService {
-    public Result<String> generateToken(String id, Map<String, ?> claims) {
 
-        final Result<SecretKey> key = getSignInKey();
+    @Value("${application.security.jwt.secret-key}")
+    private String secretKey;
+    @Value("${application.security.jwt.expiration}")
+    private long jwtExpiration;
+    @Value("${application.security.jwt.refresh-token.expiration}")
+    private long refreshExpiration;
 
-        if (key.isError())
-            return Result.error(key);
-
-        return Result.success(Jwts.builder()
-                .id(id)
-                .claims(claims)
-                .signWith(key.getValue())
-                .compact());
+    public String extractUsername(String token) {
+        return Jwts.parser()
+                .verifyWith(getSignInKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
     }
 
-    private Result<SecretKey> getSignInKey() {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] keyBytes = Decoders.BASE64.decode("SecretKey1450303485");
-            byte[] hash = digest.digest(keyBytes);
-            return Result.success(Keys.hmacShaKeyFor(hash));
-        } catch (Exception ex) {
-            return Result.error(ex, JwtService.class, "getSignInKey");
-        }
+    public Integer extractUserId(String token) {
+        return (Integer) Jwts.parser()
+                .verifyWith(getSignInKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("userId");
+    }
+
+    public String generateToken(final User user) {
+        return buildToken(user, refreshExpiration);
+    }
+
+    public String generateRefreshToken(final User user) {
+        return buildToken(user, refreshExpiration);
+    }
+
+    private String buildToken(final User user, final long expiration) {
+        return Jwts
+                .builder()
+                .claims(Map.of("email", user.getEmail(), "userId", user.getId()))
+                .subject(user.getEmail())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSignInKey())
+                .compact();
+    }
+
+    public boolean isTokenValid(String token, User user) {
+        final String username = extractUsername(token);
+        return (username.equals(user.getEmail())) && !isTokenExpired(token);
+    }
+
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    private Date extractExpiration(String token) {
+        return Jwts.parser()
+                .verifyWith(getSignInKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getExpiration();
+    }
+
+    private SecretKey getSignInKey() {
+        final byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 }

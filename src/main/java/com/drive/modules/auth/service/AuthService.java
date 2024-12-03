@@ -1,39 +1,108 @@
 package com.drive.modules.auth.service;
 
-import java.util.Map;
+import java.util.List;
 
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.drive.exception.NotAutorizedException;
-import com.drive.modules.auth.model.SigninRequest;
+import com.drive.modules.auth.model.AuthRequest;
+import com.drive.modules.auth.model.RegisterRequest;
+import com.drive.modules.auth.model.Token;
 import com.drive.modules.auth.model.TokenResponse;
-import com.drive.modules.auth.model.UserModel;
-import com.drive.modules.auth.repository.UserRepository;
-import com.drive.tools.Result;
+import com.drive.modules.auth.repository.TokenRepository;
+import com.drive.modules.user.model.User;
+import com.drive.modules.user.repository.UserRepository;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-
+    private final UserRepository repository;
+    private final TokenRepository tokenRepository;
+    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final UserRepository userRepository;
+    private final AuthenticationManager authenticationManager;
 
-    public Result<TokenResponse> signin(SigninRequest request) {
-        // se obtiene el usuario del repositorio
-        Result<UserModel> userModel = userRepository.readByEmail(request.email());
+    public TokenResponse register(final RegisterRequest request) {
+        final User user = User.builder()
+                .firstName(request.firstName())
+                .lastName(request.lastName())
+                .dateOfBirth(request.dateOfBirth())
+                .address(request.address())
+                .phone(request.phone())
+                .email(request.email())
+                .password(passwordEncoder.encode(request.password()))
+                .build();
 
-        // se valída que no se presento ningún error
-        if (userModel.isError())
-            return Result.error(userModel);
+        final User savedUser = repository.saveAll(List.of(user)).get(0);
+        final String jwtToken = jwtService.generateToken(savedUser);
+        final String refreshToken = jwtService.generateRefreshToken(savedUser);
 
-        // se valida si el usuario existe
+        saveUserToken(savedUser, jwtToken);
+        return new TokenResponse(jwtToken, refreshToken);
+    }
 
-        if (userModel.getValue() == null)
-            return Result.error(new NotAutorizedException("email or password is wrong"));
+    public TokenResponse authenticate(final AuthRequest request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.email(),
+                        request.password()));
+        final User user = repository.findByEmail(request.email())
+                .orElseThrow();
+        final String accessToken = jwtService.generateToken(user);
+        final String refreshToken = jwtService.generateRefreshToken(user);
+        revokeAllUserTokens(user);
+        saveUserToken(user, accessToken);
+        return new TokenResponse(accessToken, refreshToken);
+    }
 
-        Result<String> token = jwtService.generateToken("1", Map.of("email", request.email()));
-        return token.isError() ? Result.error(token) : Result.success(new TokenResponse(token.getValue()));
+    private void saveUserToken(User user, String jwtToken) {
+        final Token token = Token.builder()
+                .user(user)
+                .token(jwtToken)
+                .tokenType(Token.TokenType.BEARER)
+                .isExpired(false)
+                .isRevoked(false)
+                .build();
+        tokenRepository.saveAll(List.of(token));
+    }
+
+    private void revokeAllUserTokens(final User user) {
+        final List<Token> validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
+        if (!validUserTokens.isEmpty()) {
+            validUserTokens.forEach(token -> {
+                token.setIsExpired(true);
+                token.setIsRevoked(true);
+            });
+            tokenRepository.saveAll(validUserTokens);
+        }
+    }
+
+    public TokenResponse refreshToken(@NotNull final String authentication) {
+
+        if (authentication == null || !authentication.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Invalid auth header");
+        }
+        final String refreshToken = authentication.substring(7);
+        final String userEmail = jwtService.extractUsername(refreshToken);
+        if (userEmail == null) {
+            return null;
+        }
+
+        final User user = this.repository.findByEmail(userEmail).orElseThrow();
+        final boolean isTokenValid = jwtService.isTokenValid(refreshToken, user);
+        if (!isTokenValid) {
+            return null;
+        }
+
+        final String accessToken = jwtService.generateRefreshToken(user);
+        revokeAllUserTokens(user);
+        saveUserToken(user, accessToken);
+
+        return new TokenResponse(accessToken, refreshToken);
     }
 }

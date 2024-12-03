@@ -1,0 +1,27 @@
+server:
+  port: 3001
+  servlet:
+    context-path: /asiprof/api/v1
+
+application:
+  security:
+    jwt:
+      secret-key: 9f69dcb1879eb6b4992a8a37659e7ef9e58ece926cba88e1209879522bba0509
+      expiration: 86400000
+      refresh-token:
+        expiration: 604800000
+
+spring:
+  jackson:
+      date-format: yyyy-MM-dd
+  datasource:
+    url: jdbc:mariadb://localhost:3306/asiprof
+    username: root
+    password: 14503034
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
+    show-sql: true
