@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.drive.exception.NotAutorizedException;
 import com.drive.modules.api.ApiController;
 import com.drive.modules.auth.model.AuthRequest;
 import com.drive.modules.auth.model.RegisterRequest;
@@ -30,8 +29,7 @@ public class AuthController extends ApiController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<Object> authenticate(@Valid @RequestBody final AuthRequest request)
-            throws NotAutorizedException {
+    public ResponseEntity<Object> authenticate(@Valid @RequestBody final AuthRequest request) {
         final TokenResponse token = authService.authenticate(request);
         return ResponseEntity.ok(token);
     }
