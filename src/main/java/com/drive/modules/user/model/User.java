@@ -1,8 +1,12 @@
 package com.drive.modules.user.model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.drive.modules.auth.model.Token;
@@ -20,6 +24,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
+@EntityListeners(AuditingEntityListener.class)
 public class User {
 
     @Id
@@ -40,7 +45,7 @@ public class User {
 
     @Temporal(TemporalType.DATE)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Date dateOfBirth;
 
     @Column(nullable = true)
@@ -59,24 +64,11 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Token> tokens;
-}
 
-/*
- * CREATE TABLE `asesor` (
- * `direccion_ase` VARCHAR(250) NOT NULL COLLATE 'utf8mb4_spanish_ci',
- * `telefono_ase` VARCHAR(80) NOT NULL COLLATE 'utf8mb4_spanish_ci',
- * `correo_ase` VARCHAR(150) NOT NULL COLLATE 'utf8mb4_spanish_ci',
- * `contraseha` VARCHAR(20) NOT NULL COLLATE 'utf8mb4_spanish_ci',
- * `nombre_usuario` VARCHAR(20) NOT NULL COLLATE 'utf8mb4_spanish_ci',
- * `tipouser` VARCHAR(20) NOT NULL COLLATE 'utf8mb4_spanish_ci',
- * `id_sucursal` INT(11) NULL DEFAULT NULL,
- * PRIMARY KEY (`asesor_id`) USING BTREE,
- * INDEX `id_sucursal` (`id_sucursal`) USING BTREE,
- * CONSTRAINT `asesor_ibfk_1` FOREIGN KEY (`id_sucursal`) REFERENCES `sucursal`
- * (`id_sucursal`) ON UPDATE RESTRICT ON DELETE RESTRICT,
- * CONSTRAINT `tipouser` CHECK (`tipouser` in ('Empleado','Administrador'))
- * )
- * COLLATE='utf8mb4_spanish_ci'
- * ENGINE=InnoDB
- * ;
- */
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
+}

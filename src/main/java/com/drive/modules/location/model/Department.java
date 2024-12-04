@@ -27,7 +27,6 @@ public class Department {
     private String name;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @Column(nullable = false)
     @JoinColumn(name = "country_id")
     private Country country;
 }

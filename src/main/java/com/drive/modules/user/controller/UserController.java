@@ -42,13 +42,7 @@ public class UserController extends ApiController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> delete(@PathVariable Integer id) {
-
-        if (!userRepository.existsById(id))
-            return notFound("user not exists");
-
+    public void delete(@PathVariable Integer id) {
         userRepository.deleteById(id);
-
-        return ResponseEntity.ok(null);
     }
 }

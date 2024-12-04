@@ -68,7 +68,7 @@ public class AuthService {
                 .isExpired(false)
                 .isRevoked(false)
                 .build();
-        tokenRepository.saveAll(List.of(token));
+        tokenRepository.save(token);
     }
 
     private void revokeAllUserTokens(final User user) {
