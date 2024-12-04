@@ -24,21 +24,21 @@ public class UserController extends ApiController {
     private final UserRepository userRepository;
 
     @GetMapping
-    public ResponseEntity<Object> get(HttpServletRequest request) {
+    public ResponseEntity<User> get(HttpServletRequest request) {
         // se obtiene el id del usuario
         Integer userId = (Integer) request.getAttribute("userId");
         // se consulta el usuario en la base de datos
         Optional<User> user = userRepository.findById(userId);
         // se retorna el usuario
-        return processResponse(user, "user not exists");
+        return ResponseEntity.of(user);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getById(@PathVariable Integer id) {
+    public ResponseEntity<User> getById(@PathVariable Integer id) {
         // se consulta el usuario en la base de datos
         Optional<User> user = userRepository.findById(id);
         // se retorna el usuario
-        return processResponse(user, "user not exists");
+        return ResponseEntity.of(user);
     }
 
     @DeleteMapping("/{id}")
@@ -46,7 +46,7 @@ public class UserController extends ApiController {
 
         if (!userRepository.existsById(id))
             return notFound("user not exists");
-            
+
         userRepository.deleteById(id);
 
         return ResponseEntity.ok(null);

@@ -30,7 +30,7 @@ public abstract class ApiController {
                 : ResponseEntity.status(404).body(Map.of("message", message));
     }
 
-    protected <T> ResponseEntity<Object> notFound(String message) {
+    protected ResponseEntity<Object> notFound(String message) {
         return ResponseEntity.status(404).body(Map.of("message", message));
     }
 }
