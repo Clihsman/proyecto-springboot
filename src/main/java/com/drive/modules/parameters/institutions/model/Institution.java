@@ -1,4 +1,4 @@
-package com.drive.modules.roster.workSchedule.model;
+package com.drive.modules.parameters.institutions.model;
 
 import java.time.LocalDateTime;
 
@@ -6,14 +6,11 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.drive.modules.parameters.categories.model.Category;
-import com.drive.modules.user.model.User;
+import com.drive.modules.location.model.City;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -30,23 +27,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-public class WorkSchedule {
+public class Institution {
 
     @Id
     @GeneratedValue
     private Integer id;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = true, name = "schedule_type")
-    private WorkScheduleType type;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -55,7 +40,20 @@ public class WorkSchedule {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    public enum WorkScheduleType {
-        Entrance, Exit
-    }
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = true)
+    private String address;
+
+    @Column(nullable = true)
+    private String phone;
+
+    @Column(nullable = true)
+    private String email;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "city_id")
+    private City city;
+
 }

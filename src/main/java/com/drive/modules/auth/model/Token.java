@@ -41,7 +41,7 @@ public final class Token {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User user;
+    private User dtUser;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
