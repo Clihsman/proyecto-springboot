@@ -1,4 +1,4 @@
-package com.drive.modules.customers.model;
+package com.drive.modules.supplier.model;
 
 import java.time.LocalDateTime;
 
@@ -7,7 +7,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.drive.modules.parameters.educationalLevels.model.EducationalLevel;
-import com.drive.modules.parameters.institutions.model.Institution;
 import com.drive.modules.parameters.specialties.model.Specialty;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -32,8 +31,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-public class Customer {
-
+public class Supplier {
     @Id
     @GeneratedValue
     private Integer id;
@@ -71,14 +69,16 @@ public class Customer {
     @Column(nullable = false)
     private String email;
 
+    @Column(nullable = false)
+    private String supportArea;
+
+    @Column(nullable = false)
+    private String masteredPrograms;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
     private SexType sex;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "institution_id")
-    private Institution institution;
-    
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "specialty_id")
     private Specialty specialty;

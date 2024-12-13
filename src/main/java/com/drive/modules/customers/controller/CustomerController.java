@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.drive.modules.customers.controller.request.RequestCustomer;
+import com.drive.modules.customers.controller.request.CustomerRequest;
 import com.drive.modules.customers.model.Customer;
 import com.drive.modules.customers.service.CustomerService;
 
@@ -37,12 +37,12 @@ public class CustomerController {
     }
 
     @PostMapping
-    public ResponseEntity<Customer> createCustomer(@RequestBody @Valid RequestCustomer customer) {
+    public ResponseEntity<Customer> createCustomer(@RequestBody @Valid CustomerRequest customer) {
         return ResponseEntity.ok(customerService.createCustomer(customer));
     }
 
     @PatchMapping
-    public ResponseEntity<Customer> updateCustomer(@RequestBody @Valid RequestCustomer customer) {
+    public ResponseEntity<Customer> updateCustomer(@RequestBody @Valid CustomerRequest customer) {
         return ResponseEntity.of(customerService.updateCustomer(customer));
     }
 

@@ -1,34 +1,39 @@
 package com.drive.modules.location.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.drive.modules.api.ApiController;
 import com.drive.modules.location.model.Country;
 import com.drive.modules.location.repository.CountryRepository;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/country")
 @RequiredArgsConstructor
-public class CountryController extends ApiController {
+public class CountryController {
 
-    private CountryRepository countryRepository;
+    private final CountryRepository countryRepository;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Country> getCountry(HttpServletRequest request) {
-        Integer countryId = (Integer) request.getAttribute("id");
+    @GetMapping("/{countryId}")
+    public ResponseEntity<Country> getCountryById(@PathVariable int countryId) {
         Optional<Country> country = countryRepository.findById(countryId);
         return ResponseEntity.of(country);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Country>> getCountry() {
+        List<Country>countries = countryRepository.findAll();
+        return ResponseEntity.ok(countries);
     }
 
     @PostMapping

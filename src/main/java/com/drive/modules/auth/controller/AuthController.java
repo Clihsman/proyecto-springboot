@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.drive.modules.api.ApiController;
 import com.drive.modules.auth.model.AuthRequest;
 import com.drive.modules.auth.model.RegisterRequest;
 import com.drive.modules.auth.model.TokenResponse;
@@ -18,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-public class AuthController extends ApiController {
+public class AuthController {
 
     private final AuthService authService;
 

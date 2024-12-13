@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-public record RequestCustomer(
+public record CustomerRequest(
         @NotEmpty(message = "firstName is required") String firstName,
         String middleName,
         @NotEmpty(message = "firstSurname is required") String firstSurname,
@@ -17,5 +17,6 @@ public record RequestCustomer(
         @NotEmpty(message = "phone is required") String phone,
         @NotNull(message = "sex is required") SexType sex,
         @NotNull(message = "institution is required") Integer institution,
+        @NotNull(message = "speciality is required") Integer speciality,
         @NotNull(message = "educationalLevel is required") Integer educationalLevel) {
 }
